@@ -1,38 +1,91 @@
-import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import { Image } from 'react-native';
+import { AppLoading } from 'expo';
+import * as Font from 'expo-font';
+import { Asset } from 'expo-asset';
+import { Block, GalioProvider } from 'galio-framework';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' + 'Shake or press menu button for dev menu',
-});
+import Screens from './navigation/Screens';
+import { Images, articles, nowTheme } from './constants';
 
-export default class App extends Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
-      </View>
-    );
-  }
+// cache app images
+const assetImages = [
+  Images.Onboarding,
+  Images.Logo,
+  Images.Pro,
+  Images.NowLogo,
+  Images.iOSLogo,
+  Images.androidLogo,
+  Images.ProfilePicture,
+  Images.CreativeTimLogo,
+  Images.InvisionLogo,
+  Images.RegisterBackground,
+  Images.ProfileBackground
+];
+
+// cache product images
+articles.map(article => assetImages.push(article.image));
+
+function cacheImages(images) {
+  return images.map(image => {
+    if (typeof image === 'string') {
+      return Image.prefetch(image);
+    } else {
+      return Asset.fromModule(image).downloadAsync();
+    }
+  });
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
+export default class App extends React.Component {
+  state = {
+    isLoadingComplete: false,
+    fontLoaded: false
+  };
+
+  componentDidMount() {
+    this._loadFontsAsync()
+  }
+
+  render() {
+    if (!this.state.isLoadingComplete) {
+      return (
+        <AppLoading
+          startAsync={this._loadResourcesAsync}
+          onError={this._handleLoadingError}
+          onFinish={this._handleFinishLoading}
+        />
+      );
+    } else {
+      return (
+        <GalioProvider theme={nowTheme}>
+          <Block flex>
+            <Screens />
+          </Block>
+        </GalioProvider>
+      );
+    }
+  }
+
+  _loadFontsAsync = async () => {
+    Font.loadAsync({
+      'montserrat-regular': require('./assets/font/Montserrat-Regular.ttf'),
+      'montserrat-bold': require('./assets/font/Montserrat-Bold.ttf')
+    }).then(this.setState({ fontLoaded: true }));
+  };
+
+  _loadResourcesAsync = async () => {
+    return Promise.all([...cacheImages(assetImages)]);
+  };
+
+  _handleLoadingError = error => {
+    // In this case, you might want to report the error to your error
+    // reporting service, for example Sentry
+    console.warn(error);
+  };
+
+  _handleFinishLoading = () => {
+    if (this.state.fontLoaded) {
+      this.setState({ isLoadingComplete: true });
+    }
+  };
+}
