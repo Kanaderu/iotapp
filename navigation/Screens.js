@@ -52,11 +52,12 @@ const transitionConfig = (transitionProps, prevTransitionProps) => ({
 });
 
 const HomeStack = createStackNavigator(
+  // header: <Header search options title="Home" navigation={navigation} />
   {
     Home: {
       screen: Home,
       navigationOptions: ({ navigation }) => ({
-        header: <Header search options title="Home" navigation={navigation} />
+        header: <Header title="Home" navigation={navigation} />
       })
     },
   },
