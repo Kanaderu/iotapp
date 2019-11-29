@@ -10,8 +10,13 @@
     "entryPoint": "node_modules/expo/AppEntry.js",
     "platforms": [
       "ios",
-      "android",
-      "web"
-    ]
+      "android"
+    ],
+    "orientation": "portrait",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff"
+    },
   }
 }
