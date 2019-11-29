@@ -50,25 +50,25 @@ class Home extends React.Component {
     this.setState({
       location: position
     });
-    console.log('Updated position!');
-    console.log(this.state.location);
-    this.state.isConnected && client.send(JSON.stringify({
+
+    //this.state.isConnected &&
+    client.send(JSON.stringify({
       message: this.state.name,
       lat: this.state.location.coords.latitude,
       lon: this.state.location.coords.longitude,
     }));
   }
 
-  async UNSAFE_componentWillMount() {
+  async componentDidMount() {
     client.onopen = () => {
       console.log('Websocket Client Connected');
-      this.setState({
+      this.setState({ //TODO: doesn't seem to register
         isConnected: true
       })
     };
 
     client.onclose = () => {
-      console.log('Websocket closed unexpectedly');
+      console.log('Websocket Closed Unexpectedly');
       this.setState({
         isConnected: false
       })
