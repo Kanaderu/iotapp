@@ -1,8 +1,9 @@
 import React from "react";
-import { StyleSheet, Dimensions, ScrollView } from "react-native";
+import { Platform, StyleSheet, Dimensions, ScrollView } from "react-native";
 import { Block, theme, Text } from "galio-framework";
-
-import Geolocation from 'react-native-geolocation-service';
+import Constants from 'expo-constants';
+import * as Location from 'expo-location';
+import * as Permissions from 'expo-permissions';
 
 import { Card, Button } from "../components";
 import articles from "../constants/articles";
@@ -32,11 +33,25 @@ class Home extends React.Component {
     this.positionCallback = this.positionCallback.bind(this)
   }
 
+  _getLocationAsync = async () => {
+    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status !== 'granted') {
+      this.setState({
+        errorMessage: 'Permission to access location was denied',
+      });
+    }
+
+    // high accuracy needed otherwise android emulator returns incorrect locations
+    let location = await Location.getCurrentPositionAsync({enableHighAccuracy: true});
+    this.setState({ location });
+  };
+
   positionCallback(position) {
     this.setState({
       location: position
     });
-
+    console.log('Updated position!');
+    console.log(this.state.location);
     this.state.isConnected && client.send(JSON.stringify({
       message: this.state.name,
       lat: this.state.location.coords.latitude,
@@ -44,7 +59,7 @@ class Home extends React.Component {
     }));
   }
 
-  UNSAFE_componentWillMount() {
+  async UNSAFE_componentWillMount() {
     client.onopen = () => {
       console.log('Websocket Client Connected');
       this.setState({
@@ -59,30 +74,18 @@ class Home extends React.Component {
       })
     };
 
-    try {
-      const granted = PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-      );
-
-      if (true) {
-        Geolocation.getCurrentPosition(
-            this.positionCallback,
-            (error) => {
-              // See error code charts below.
-              console.log(error.code, error.message);
-            },
-            { distanceFilter: 20, enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-        );
-        Geolocation.watchPosition(
-            this.positionCallback,
-            (error) => {
-              console.log(error.code, error.message);
-            },
-            { distanceFilter: 20, enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-        );
-      }
-    } catch (err) {
-      console.warn(err);
+    this._getLocationAsync();
+    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status !== 'granted') {
+      this.setState({
+        errorMessage: 'Permission to access location was denied',
+      });
+    } else {
+      //https://docs.expo.io/versions/latest/sdk/location/#locationaccuracy
+      await Location.watchPositionAsync(
+          { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 300, distanceInterval: 5 },
+          this.positionCallback
+      )
     }
   }
 
