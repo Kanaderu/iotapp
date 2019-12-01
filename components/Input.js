@@ -8,6 +8,7 @@ import Icon from './Icon';
 import { nowTheme } from "../constants";
 
 class ArInput extends React.Component {
+
   render() {
     const { shadowless, success, error, primary } = this.props;
 
@@ -26,6 +27,7 @@ class ArInput extends React.Component {
         placeholderTextColor={nowTheme.COLORS.MUTED}
         style={inputStyles}
         color={nowTheme.COLORS.HEADER}
+        /*
         iconContent={
           <Icon
             size={14}
@@ -34,6 +36,8 @@ class ArInput extends React.Component {
             family="AntDesign"
           />
         }
+        */
+
         {...this.props}
       />
     );
