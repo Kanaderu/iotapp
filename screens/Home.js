@@ -1,6 +1,6 @@
 import React from "react";
 import { Platform, StyleSheet, Dimensions, ScrollView } from "react-native";
-import { Block, theme, Text } from "galio-framework";
+import { Block, theme, Text, Toast } from "galio-framework";
 import Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
@@ -17,6 +17,9 @@ class Home extends React.Component {
     super(props);
     this.client = null;
     this.state = {
+      showToast: false,
+      toastMessage: "",
+
       host: "",
       roomName: "",
 
@@ -43,7 +46,7 @@ class Home extends React.Component {
       this.setState({
         errorMessage: 'Permission to access location was denied',
       });
-    };
+    }
 
     // high accuracy needed otherwise android emulator returns incorrect locations
     let location = await Location.getCurrentPositionAsync({enableHighAccuracy: true});
@@ -111,7 +114,11 @@ class Home extends React.Component {
       this.setState({isConnected: false});
     };
 
-    this.setState({ isConnected: true });
+    this.setState({
+      isConnected: true,
+      //toastMessage: "Connected to " + this.state.host,
+      //showToast: true
+    });
   };
 
   handleChange = (name, value) => {
@@ -152,9 +159,32 @@ class Home extends React.Component {
           <Text h4>UD IoT Live Map</Text>
         </Block>
         <Block center>
-          <ArInput onChangeText={text => this.handleChange('host', text)} placeholder="Hostname" icon="home" family="Entypo" iconSize={16} />
-          <ArInput onChangeText={text => this.handleChange('roomName', text)} placeholder="Room Name" icon="map" family="Foundation" iconSize={16} />
-          <ArInput onChangeText={text => this.handleChange('name', text)} placeholder="ID" icon="user" family="Entypo" iconSize={16} />
+          <ArInput
+            onChangeText={text => this.handleChange('host', text)}
+            placeholder="Hostname"
+            icon="home"
+            family="Entypo"
+            iconSize={16}>
+            {this.state.host}
+          </ArInput>
+          <ArInput
+            onChangeText={text => this.handleChange('roomName', text)}
+            placeholder="Room Name"
+            icon="map"
+            family="Foundation"
+            iconSize={16}
+          >
+            {this.state.roomName}
+          </ArInput>
+          <ArInput
+            onChangeText={text => this.handleChange('name', text)}
+            placeholder="ID"
+            icon="user"
+            family="Entypo"
+            iconSize={16}
+          >
+            {this.state.name}
+          </ArInput>
           <ArButton round size="small" onPress={this.onSubmit}>Submit</ArButton>
         </Block>
       </ScrollView>
@@ -165,6 +195,16 @@ class Home extends React.Component {
     if(!this.state.isConnected) {
       return(
         <Block flex center style={styles.home}>
+          {/*
+          <Toast
+            style={{top: 0}}
+            sucess
+            isShow={this.state.showToast}
+            positionIndicator="top"
+          >
+            {this.state.toastMessage}
+          </Toast>
+          */}
           {this.renderSetup()}
         </Block>
       )
@@ -172,6 +212,17 @@ class Home extends React.Component {
     else {
       return (
         <Block flex center style={styles.home}>
+          {/*
+          <Toast
+              fadeOutDuration={1000}
+              style={{top: 0}}
+              success
+              isShow={this.state.showToast}
+              positionIndicator="top"
+          >
+            {this.state.toastMessage}
+          </Toast>
+          */}
           {this.renderPosition()}
         </Block>
       );
