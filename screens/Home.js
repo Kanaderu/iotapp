@@ -6,7 +6,6 @@ import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
 
 import { Card, Button } from "../components";
-import articles from "../constants/articles";
 
 import ArInput from "../components/Input";
 import ArButton from "../components/Button";
@@ -18,10 +17,10 @@ class Home extends React.Component {
     super(props);
     this.client = null;
     this.state = {
-      host: null,
-      roomName: null,
+      host: "",
+      roomName: "",
 
-      name: 'noname',
+      name: "",
       isConnected: false,
       location: {
         timestamp: null,
@@ -36,7 +35,7 @@ class Home extends React.Component {
       }
     };
     this.positionCallback = this.positionCallback.bind(this)
-  }
+  };
 
   _getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
@@ -44,11 +43,11 @@ class Home extends React.Component {
       this.setState({
         errorMessage: 'Permission to access location was denied',
       });
-    }
+    };
 
     // high accuracy needed otherwise android emulator returns incorrect locations
     let location = await Location.getCurrentPositionAsync({enableHighAccuracy: true});
-    this.setState({ location });
+    this.positionCallback(location);
   };
 
   positionCallback(position) {
@@ -61,7 +60,7 @@ class Home extends React.Component {
       lat: this.state.location.coords.latitude,
       lon: this.state.location.coords.longitude,
     }));
-  }
+  };
 
   async componentDidMount() {
 
@@ -81,9 +80,20 @@ class Home extends React.Component {
           this.positionCallback
       )
     }
-  }
+  };
 
   onSubmit = () => {
+
+    if(this.state.name.trim() === "") {
+
+    }
+    if(this.state.host.trim() === "") {
+
+    }
+    if(this.state.roomName.trim() === "") {
+
+    }
+
     const address = 'wss://' + this.state.host + '/ws/live/' + this.state.roomName + '/';
     this.client = new WebSocket(address);
 
@@ -144,6 +154,7 @@ class Home extends React.Component {
         <Block center>
           <ArInput onChangeText={text => this.handleChange('host', text)} placeholder="Hostname" icon="home" family="Entypo" iconSize={16} />
           <ArInput onChangeText={text => this.handleChange('roomName', text)} placeholder="Room Name" icon="map" family="Foundation" iconSize={16} />
+          <ArInput onChangeText={text => this.handleChange('name', text)} placeholder="ID" icon="user" family="Entypo" iconSize={16} />
           <ArButton round size="small" onPress={this.onSubmit}>Submit</ArButton>
         </Block>
       </ScrollView>
