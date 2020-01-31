@@ -58,11 +58,14 @@ class Home extends React.Component {
       location: position
     });
 
-    this.state.isConnected && this.client.send(JSON.stringify({
-      message: this.state.name,
-      lat: this.state.location.coords.latitude,
-      lon: this.state.location.coords.longitude,
-    }));
+    if(this.state.isConnected) {
+      this.client.send(JSON.stringify({
+        message: this.state.name,
+        lat: this.state.location.coords.latitude,
+        lon: this.state.location.coords.longitude,
+      }));
+    }
+
   };
 
   async componentDidMount() {
@@ -79,7 +82,7 @@ class Home extends React.Component {
       // add watcher to location update
       //https://docs.expo.io/versions/latest/sdk/location/#locationaccuracy
       await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 300, distanceInterval: 5 },
+          { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 300, distanceInterval: 0 },
           this.positionCallback
       )
     }
@@ -97,7 +100,7 @@ class Home extends React.Component {
 
     }
 
-    const address = 'wss://' + this.state.host + '/ws/live/' + this.state.roomName + '/';
+    const address = 'wss://' + this.state.host + '/live/' + this.state.roomName + '/';
     this.client = new WebSocket(address);
 
     this.client.onopen = () => {
